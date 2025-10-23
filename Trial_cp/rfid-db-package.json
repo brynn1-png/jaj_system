@@ -1,0 +1,22 @@
+{
+  "name": "rfid-attendance-system-db",
+  "version": "1.0.0",
+  "description": "RFID-based attendance system with MySQL database monitoring",
+  "main": "src/js/rfid-db-server.js",
+  "scripts": {
+    "start": "node src/js/rfid-db-server.js",
+    "dev": "nodemon src/js/rfid-db-server.js",
+    "serve": "python -m http.server 8000"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["rfid", "attendance", "school", "student", "mysql"],
+  "author": "JAJ Attendance System",
+  "license": "MIT"
+}

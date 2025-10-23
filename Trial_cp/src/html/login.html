@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance System - Login</title>
+    <link rel="stylesheet" href="../css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Split-screen Login Page Styles */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+        }
+
+        .login-left {
+            flex: 1;
+            background: white url('../assets/8599.jpg') center/contain no-repeat;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .jaj-seal {
+            max-width: 80px;
+            max-height: 80px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            margin-bottom: var(--spacing-lg);
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .login-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-2xl);
+            background: var(--bg-primary);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 3rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .login-form {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .mb-3 {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Input Group - modern design */
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group-text {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            z-index: 2;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 48px;
+            padding: 0 1rem 0 4rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #1a1a1a;
+            background: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Error message */
+        #error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: var(--danger-color);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+            display: none;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        #error-message i {
+            font-size: 1.1rem;
+        }
+
+        /* Utilities since Bootstrap CSS isn't loaded */
+        .w-100 {
+            width: 100%;
+        }
+
+        .py-3 {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        /* Login Button */
+        .btn-primary {
+            width: 100%;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 2rem;
+        }
+
+        .forgot-password a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .signup-link {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .signup-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .signup-link a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* Shake animation referenced by JS */
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translateX(-1px);
+            }
+
+            20%,
+            80% {
+                transform: translateX(2px);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translateX(-4px);
+            }
+
+            40%,
+            60% {
+                transform: translateX(4px);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-wrapper {
+                flex-direction: column;
+            }
+
+            .login-left {
+                flex: none;
+                min-height: 300px;
+                background: url('../assets/11037.jpg') center/contain no-repeat;
+            }
+
+            .login-left::before {
+                background: rgba(0, 0, 0, 0.5);
+            }
+
+            .login-right {
+                flex: none;
+                padding: var(--spacing-xl);
+            }
+
+            .illustration h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: var(--spacing-xl);
+                margin: var(--spacing-md);
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .login-left {
+                padding: var(--spacing-lg);
+            }
+
+            .illustration p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-wrapper">
+        <div class="login-left">
+            <!-- Left side with 8599.jpg background -->
+        </div>
+        <div class="login-right">
+            <div class="login-card">
+                <img src="../assets/JAJ seal.jpg" alt="JAJ Seal" class="jaj-seal">
+                <h1>Login</h1>
+
+                <form id="login-form" class="login-form">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class=""></i></span>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Username"
+                            required>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-text"><i class=""></i></span>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="Password"
+                            required>
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="btn-primary">
+                        Login
+                    </button>
+
+
+                </form>
+
+                <div id="error-message" class="alert alert-danger d-flex align-items-center" role="alert"
+                    style="display: none;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <div>Invalid username or password. Please try again.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/login.js"></script>
+
+</body>
+
+</html>

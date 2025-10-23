@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <style>
+        /* Add Student Button Custom Style */
+        #add-student-btn {
+            background: linear-gradient(90deg, var(--primary-color) 60%, var(--primary-hover) 100%);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.05rem;
+            border: none;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            padding: 0.75rem 2.2rem 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+        }
+
+        #add-student-btn:hover,
+        #add-student-btn:focus {
+            background: linear-gradient(90deg, var(--primary-hover) 60%, var(--primary-color) 100%);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px) scale(1.03);
+            color: #fff;
+        }
+
+        #add-student-btn i {
+            font-size: 1.15em;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .input-with-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 12px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .input-with-icon input:focus,
+        .input-with-icon select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+        }
+
+        .student-card {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-md);
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s;
+            width: 300px;
+            height: 150px;
+        }
+
+        .student-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .student-card-header {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .student-card-content {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .student-actions {
+            position: relative;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-primary);
+            color: var(--primary-color);
+        }
+
+        .edit-mode-overlay {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .edit-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: var(--spacing-sm);
+            min-width: 120px;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .grade-filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .grade-filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .grade-filter-btn:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+        }
+
+        .grade-filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .sort-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .sort-dropdown {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
+
+        .sort-dropdown:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .2);
+        }
+    </style>
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="../assets/JAJ Seal.jpg" alt="JAJ Logo">
+                    <h3><i class="fas fa-graduation-cap"></i> Attendance System</h3>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a></li>
+                <li><a href="students.html" class="nav-link active">
+                        <i class="fas fa-users"></i> Students
+                    </a></li>
+                <li><a href="attendance.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i> Attendance
+                    </a></li>
+                <li><a href="notifications.html" class="nav-link">
+                        <i class="fas fa-bell"></i> Notifications
+                    </a></li>
+                <li><a href="#" id="logout-btn" class="nav-link" onclick="confirmLogout(event)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+                <li class="sidebar-theme-toggle">
+                    <button id="sidebar-theme-toggle" class="theme-toggle-sidebar" title="Toggle Theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-wrapper">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-users"></i> Student Management</h1>
+                    <div class="header-actions">
+
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Connection Status -->
+                <!-- connection-status banner removed -->
+
+                <!-- Student Statistics -->
+                <section class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <h3 id="total-students">0</h3>
+                                <p>Total Students</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-user-graduate"></i>
+                            <div>
+                                <h3 id="active-students">0</h3>
+                                <p>Active Students</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-archive"></i>
+                            <div>
+                                <h3 id="archived-students">0</h3>
+                                <p>Archived Students</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Student Management Header -->
+                <section class="management-header">
+                    <div class="search-section">
+                        <div class="search-input">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="student-search" placeholder="Search students...">
+                        </div>
+                        <div class="sort-section">
+                            <label for="student-grade-filter" style="margin-right: 0.5rem; font-weight: 500;">Filter by
+                                Grade:</label>
+                            <select id="student-grade-filter" class="sort-dropdown">
+                                <option value="all" selected>All Grades</option>
+                                <option value="Junior Kinder">Junior Kinder</option>
+                                <option value="Kinder">Kinder</option>
+                                <option value="Grade 1">Grade 1</option>
+                                <option value="Grade 2">Grade 2</option>
+                                <option value="Grade 3">Grade 3</option>
+                                <option value="Grade 4">Grade 4</option>
+                                <option value="Grade 5">Grade 5</option>
+                                <option value="Grade 6">Grade 6</option>
+                            </select>
+                        </div>
+                        <div class="header-actions">
+                            <button id="add-student-btn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Student
+                            </button>
+                            <button id="toggle-archived-btn" class="btn btn-secondary">
+                                <i class="fas fa-archive"></i> Show Archived Students
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Students Grid -->
+                <section class="students-section">
+                    <div class="students-grid" id="students-grid">
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <p>No students found. Add your first student!</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+    </div>
+    </div>
+
+    <!-- Add Student Modal -->
+    <div id="add-student-modal" class="modal">
+        <div class="modal-content add-student">
+            <div class="modal-header-title">
+                <div class="icon-circle"><i class="fas fa-user-plus"></i></div>
+                <div>
+                    <h2>Add New Student</h2>
+                    <p class="subtitle">Enter the student's details below</p>
+                </div>
+            </div>
+            <form id="add-student-form">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Student Number</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="text" id="student-number" name="student-number" required
+                                placeholder="e.g. STU001">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Full Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="student-name" name="name" required placeholder="e.g. John Doe">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Parent Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="parent-name" name="parent-name" required placeholder="e.g. Jane Doe">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Parent Phone</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="parent-number" name="parent-number" required
+                                placeholder="e.g. +1 555 123 4567">
+                        </div>
+                    </div>
+                    <!-- Section field removed: not in students table -->
+                    <div class="form-field">
+                        <label>Grade</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                            <select id="student-grade" name="grade" required>
+                                <option value="">Select Grade</option>
+                                <option value="Junior Kinder">Junior Kinder</option>
+                                <option value="Kinder">Kinder</option>
+                                <option value="Grade 1">Grade 1</option>
+                                <option value="Grade 2">Grade 2</option>
+                                <option value="Grade 3">Grade 3</option>
+                                <option value="Grade 4">Grade 4</option>
+                                <option value="Grade 5">Grade 5</option>
+                                <option value="Grade 6">Grade 6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>RFID Tag</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" id="student-rfid" name="rfid" placeholder="e.g. STU001">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Student Photo</label>
+                        <input type="file" id="student-photo" name="photo" accept="image/*"
+                            style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-primary);">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-add" class="btn btn-secondary"
+                        onclick="document.getElementById('add-student-modal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Student Modal -->
+    <div id="edit-student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header-title">
+                <div class="icon-circle"><i class="fas fa-user-edit"></i></div>
+                <div>
+                    <h2>Edit Student</h2>
+                    <p class="subtitle">Update the student's information below</p>
+                </div>
+            </div>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-student-id">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Student Number</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-id-badge"></i>
+                            <input type="text" id="edit-student-number" name="student-number" required
+                                placeholder="e.g. STU001">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Full Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="edit-student-name" name="name" required placeholder="e.g. John Doe">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Parent Name</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="edit-parent-name" name="parent-name" required
+                                placeholder="e.g. Jane Doe">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Parent Phone</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="edit-parent-number" name="parent-number" required
+                                placeholder="e.g. +1 555 123 4567">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Grade</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                            <select id="edit-student-grade" name="grade" required>
+                                <option value="">Select Grade</option>
+                                <option value="Junior Kinder">Junior Kinder</option>
+                                <option value="Kinder">Kinder</option>
+                                <option value="Grade 1">Grade 1</option>
+                                <option value="Grade 2">Grade 2</option>
+                                <option value="Grade 3">Grade 3</option>
+                                <option value="Grade 4">Grade 4</option>
+                                <option value="Grade 5">Grade 5</option>
+                                <option value="Grade 6">Grade 6</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>RFID Tag</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" id="edit-student-rfid" name="rfid" placeholder="e.g. STU001">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Student Photo</label>
+                        <input type="file" id="edit-student-photo" name="photo" accept="image/*"
+                            style="padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-primary);">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-edit" class="btn btn-secondary"
+                        onclick="document.getElementById('edit-student-modal').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Archive Confirmation Modal -->
+    <div id="archive-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h2>Archive Student</h2>
+            <p>Are you sure you want to archive <strong id="archive-student-name"></strong>?</p>
+            <p class="warning-text">This action cannot be undone. The student will be moved to archived records.</p>
+            <div class="modal-actions">
+                <button id="confirm-archive" class="btn btn-danger">Yes, Archive</button>
+                <button id="cancel-archive" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/ui.js"></script>
+    <script type="module">
+        import '../js/supabase-config.js';
+        import '../js/auth.js';
+        import '../js/app-new.js';
+    </script>
+    <script>
+        // Initialize global variables
+        window.students = [];
+        window.isConnected = true; // Set to true since we have Supabase connection
+        window.showingArchived = false; // Track whether we're showing archived students
+        // Add Student Modal: Add student to database
+        async function handleAddStudent(e) {
+            e.preventDefault();
+
+            // Collect form data
+            const student_number = document.getElementById('student-number').value.trim();
+            const name = document.getElementById('student-name').value.trim();
+            const parent_name = document.getElementById('parent-name').value.trim();
+            const parent_number = document.getElementById('parent-number').value.trim();
+            const grade = document.getElementById('student-grade').value.trim();
+            const rfid = document.getElementById('student-rfid').value.trim();
+            const photoFile = document.getElementById('student-photo').files[0];
+
+            // Validate required fields
+            if (!student_number || !name || !parent_name || !parent_number || !grade) {
+                if (typeof showNotification === 'function') showNotification('Please fill in all required fields');
+                return;
+            }
+
+            // Build student object
+            const newStudent = { student_number, name, parent_name, parent_number, grade, rfid };
+
+            console.log('Adding student:', newStudent);
+            console.log('Photo file:', photoFile);
+
+            try {
+                // Call your API or Supabase client to insert
+                const result = await ApiService.addStudent(newStudent, photoFile);
+
+                console.log('Student added result:', result);
+
+                if (typeof showNotification === 'function') showNotification('Student added successfully!');
+                document.getElementById('add-student-form').reset();
+                document.getElementById('add-student-modal').style.display = 'none';
+                if (typeof loadStudents === 'function') loadStudents();
+            } catch (error) {
+                console.error('Error adding student:', error);
+                if (typeof showNotification === 'function') showNotification('Error adding student: ' + error.message);
+            }
+        }
+        // Student Management Specific Functions
+        let currentSearchTerm = '';
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeStudentPage();
+        });
+
+        function initializeStudentPage() {
+            console.log('Initializing student page...');
+            setupStudentEventListeners();
+            loadStudents();
+        }
+
+        function setupStudentEventListeners() {
+            // Add student modal
+            const addStudentBtn = document.getElementById('add-student-btn');
+            const addStudentModal = document.getElementById('add-student-modal');
+            const addStudentForm = document.getElementById('add-student-form');
+
+            if (addStudentBtn && addStudentModal) {
+                addStudentBtn.addEventListener('click', () => {
+                    addStudentModal.style.display = 'block';
+                });
+            }
+
+            if (addStudentForm) {
+                addStudentForm.addEventListener('submit', handleAddStudent);
+            }
+
+            // Cancel add student
+            const cancelAddBtn = document.getElementById('cancel-add');
+            if (cancelAddBtn) {
+                cancelAddBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (addStudentForm) addStudentForm.reset();
+                    addStudentModal.style.display = 'none';
+                });
+            }
+            // Escape key closes Add Student modal as well
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const m = document.getElementById('add-student-modal');
+                    if (m) m.style.display = 'none';
+                }
+            });
+
+            // Also reset form when closing via the X button
+            const addStudentClose = document.querySelector('#add-student-modal .close');
+            if (addStudentClose) {
+                addStudentClose.addEventListener('click', () => {
+                    if (addStudentForm) addStudentForm.reset();
+                });
+            }
+
+            // Edit student modal
+            const editStudentForm = document.getElementById('edit-student-form');
+            if (editStudentForm) {
+                editStudentForm.addEventListener('submit', handleEditStudent);
+            }
+
+            // Cancel edit student
+            const cancelEditBtn = document.getElementById('cancel-edit');
+            if (cancelEditBtn) {
+                cancelEditBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('edit-student-modal').style.display = 'none';
+                });
+            }
+
+            // Archive confirmation
+            const confirmArchiveBtn = document.getElementById('confirm-archive');
+            const cancelArchiveBtn = document.getElementById('cancel-archive');
+
+            if (confirmArchiveBtn) {
+                confirmArchiveBtn.addEventListener('click', handleArchiveStudent);
+            }
+
+            if (cancelArchiveBtn) {
+                cancelArchiveBtn.addEventListener('click', () => {
+                    document.getElementById('archive-confirm-modal').style.display = 'none';
+                });
+            }
+
+            // Search functionality
+            const searchInput = document.getElementById('student-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', handleStudentSearch);
+            }
+
+            // Grade filter functionality
+            const gradeFilterSelect = document.getElementById('student-grade-filter');
+            if (gradeFilterSelect) {
+                gradeFilterSelect.addEventListener('change', handleGradeFilter);
+            }
+
+            // Toggle archived students functionality
+            const toggleArchivedBtn = document.getElementById('toggle-archived-btn');
+            if (toggleArchivedBtn) {
+                toggleArchivedBtn.addEventListener('click', toggleArchivedView);
+            }
+
+            // Modal close buttons
+            const closeButtons = document.querySelectorAll('.close');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const modals = document.querySelectorAll('.modal');
+                    modals.forEach(modal => modal.style.display = 'none');
+                });
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', (e) => {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        async function loadStudents() {
+            console.log('Loading students...');
+            console.log('Connection status:', window.isConnected);
+            console.log('Showing archived:', window.showingArchived);
+
+            try {
+                console.log('Making API call to fetch students...');
+                const fetchedStudents = window.showingArchived
+                    ? await ApiService.fetchArchivedStudents()
+                    : await ApiService.fetchStudents();
+                console.log('Raw API response:', fetchedStudents);
+                console.log('API response type:', typeof fetchedStudents);
+                console.log('API response is array:', Array.isArray(fetchedStudents));
+                console.log('API response length:', fetchedStudents ? fetchedStudents.length : 'null/undefined');
+
+                window.students = Array.isArray(fetchedStudents) ? fetchedStudents : [];
+                console.log('Students assigned to window.students:', window.students.length);
+                console.log('Student grades:', window.students.map(s => ({ name: s.name, grade: s.grade, archived: s.archived })));
+
+                renderStudents();
+                updateStudentStats();
+            } catch (error) {
+                console.error('Error loading students:', error);
+                console.error('Error details:', error.message, error.stack);
+                if (typeof showNotification === 'function') showNotification('Error loading students');
+                // Fallback to empty array
+                window.students = [];
+                renderStudents();
+                updateStudentStats();
+            }
+        }
+
+        function renderStudents() {
+            const container = document.getElementById('students-grid');
+            if (!container) return;
+
+            console.log('Rendering students');
+            console.log('Total students in window.students:', window.students ? window.students.length : 'undefined');
+            console.log('window.students type:', typeof window.students);
+            console.log('window.students is array:', Array.isArray(window.students));
+
+            let list = Array.isArray(window.students) ? [...window.students] : [];
+            console.log('List after array check:', list.length);
+
+            // Apply grade filter first
+            const gradeFilterSelect = document.getElementById('student-grade-filter');
+            const selectedGrade = gradeFilterSelect ? gradeFilterSelect.value : 'all';
+            if (selectedGrade && selectedGrade !== 'all') {
+                list = list.filter(student => String(student.grade || '').trim() === selectedGrade);
+            }
+
+            // Apply search filter
+            if (typeof currentSearchTerm === 'string' && currentSearchTerm.trim() !== '') {
+                const term = currentSearchTerm.trim().toLowerCase();
+                list = list.filter(student =>
+                    (student.name || '').toLowerCase().includes(term) ||
+                    (student.email || '').toLowerCase().includes(term) ||
+                    (student.rfid || '').toLowerCase().includes(term) ||
+                    (String(student.grade || '')).toLowerCase().includes(term) ||
+                    ((student.section || student.section_name || student.sectionName || '') + '').toLowerCase().includes(term)
+                );
+            }
+
+            // Sort by grade order first, then by name within each grade
+            const gradeOrder = ['Junior Kinder', 'Kinder', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+
+            list.sort((a, b) => {
+                const aGrade = a.grade || '';
+                const bGrade = b.grade || '';
+
+                // Get grade index for ordering
+                const aGradeIndex = gradeOrder.indexOf(aGrade);
+                const bGradeIndex = gradeOrder.indexOf(bGrade);
+
+                // If both grades are in the defined order, sort by grade order
+                if (aGradeIndex !== -1 && bGradeIndex !== -1) {
+                    if (aGradeIndex !== bGradeIndex) {
+                        return aGradeIndex - bGradeIndex;
+                    }
+                } else if (aGradeIndex !== -1) {
+                    return -1; // a comes first (known grade)
+                } else if (bGradeIndex !== -1) {
+                    return 1; // b comes first (known grade)
+                }
+
+                // If grades are the same or both unknown, sort by name
+                return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+            });
+
+            console.log('Sorted student list:', list.map(s => ({ name: s.name, grade: s.grade })));
+
+            container.innerHTML = '';
+            console.log('Setting container HTML to empty, list length:', list.length);
+            if (list.length === 0) {
+                console.log('No students found, showing empty state');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No students found. Add your first student!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('Rendering student cards for filtered list:', list.length);
+            list.forEach(student => {
+                console.log('Creating card for student:', student.name, 'Grade:', student.grade);
+                const studentCard = createStudentCard(student);
+                container.appendChild(studentCard);
+            });
+            console.log('Finished rendering', list.length, 'student cards');
+        }
+
+        function createStudentCard(student) {
+            const card = document.createElement('div');
+            let avatarSrc = null;
+            if (student.avatars) {
+                console.log('Student avatar data:', student.avatars); // Debug log
+                if (student.avatars.startsWith('http')) {
+                    avatarSrc = student.avatars;
+                } else {
+                    // Fetch public URL from Supabase storage
+                    try {
+                        const { data, error } = supabase.storage.from('avatars').getPublicUrl(student.avatars);
+                        if (error) {
+                            console.error('Error getting public URL:', error);
+                        } else {
+                            avatarSrc = data.publicUrl;
+                            console.log('Generated public URL:', avatarSrc); // Debug log
+                        }
+                    } catch (e) {
+                        console.error('Exception getting avatar URL:', e);
+                    }
+                }
+            }
+
+            const avatarContent = avatarSrc
+                ? `<img src="${avatarSrc}" alt="${student.name}" class="student-avatar-img" onerror="this.style.display='none'; this.nextSibling.style.display='block';" onload="console.log('Image loaded:', this.src)"><span class="avatar-fallback" style="display:none;">No Photo Available</span>`
+                : 'No Photo Available';
+            const section = student.section || student.section_name || student.sectionName || 'N/A';
+            // Split name into first and last name for styling
+            const nameParts = student.name.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+
+            const isArchived = student.archived;
+            const cardClass = isArchived ? 'student-card archived-student' : 'student-card';
+            card.className = cardClass; // Apply the correct class
+            const editButton = isArchived
+                ? `<button class="btn btn-success btn-sm" onclick="confirmUnarchive('${student.id}', '${student.name.replace(/'/g, "\\'")}')" title="Restore Student">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>`
+                : `<button class="btn-icon" onclick="toggleEditMode('${student.id}', event)" title="Edit Student">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>`;
+
+            card.innerHTML = `
+                <div class="student-card-header">
+                    ${editButton}
+                </div>
+                <div class="student-card-content">
+                    <div class="student-avatar" onclick="showStudentDetails('${student.id}')" style="cursor: pointer;">${avatarContent}</div>
+                    <div class="student-info">
+                        <h3>${firstName} <span class="last-name">${lastName}</span>${isArchived ? ' <span class="archived-badge">(Archived)</span>' : ''}</h3>
+                        <p><strong>Student Number:</strong> ${student.student_number || 'N/A'}</p>
+                        <p><strong>Grade:</strong> ${student.grade || 'N/A'}</p>
+                        <p><strong>RFID Tag:</strong> ${student.rfid || 'Not assigned'}</p>
+                        ${isArchived ? `<p><strong>Archived:</strong> ${student.archived_at ? new Date(student.archived_at).toLocaleDateString() : 'N/A'}</p>` : ''}
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // Make the function globally available for use by other scripts
+        window.createStudentCard = createStudentCard;
+
+        async function updateStudentStats() {
+            // Always show consistent stats: total, active, archived
+            let totalStudents = 0;
+            let activeStudents = 0;
+            let archivedStudents = 0;
+
+            if (window.isConnected) {
+                try {
+                    const allStudents = await ApiService.fetchStudents();
+                    const archived = await ApiService.fetchArchivedStudents();
+                    totalStudents = allStudents.length + archived.length;
+                    activeStudents = allStudents.length;
+                    archivedStudents = archived.length;
+                } catch (error) {
+                    console.error('Error fetching student counts:', error);
+                    // Fallback to current view data
+                    totalStudents = window.students.length;
+                    activeStudents = window.students.filter(s => !s.archived).length;
+                    archivedStudents = window.students.filter(s => s.archived).length;
+                }
+            } else {
+                // Offline mode - use current view data
+                totalStudents = window.students.length;
+                activeStudents = window.students.filter(s => !s.archived).length;
+                archivedStudents = window.students.filter(s => s.archived).length;
+            }
+
+            document.getElementById('total-students').textContent = totalStudents;
+            document.getElementById('active-students').textContent = activeStudents;
+            document.getElementById('archived-students').textContent = archivedStudents;
+        }
+
+
+
+        function openEditModal(studentId) {
+            const student = students.find(s => s.id == studentId);
+            if (!student) return;
+
+            document.getElementById('edit-student-id').value = student.id;
+            document.getElementById('edit-student-number').value = student.student_number || '';
+            document.getElementById('edit-student-name').value = student.name || '';
+            document.getElementById('edit-parent-name').value = student.parent_name || '';
+            document.getElementById('edit-parent-number').value = student.parent_phone || student.parentPhone || '';
+            document.getElementById('edit-student-grade').value = student.grade || '';
+            document.getElementById('edit-student-rfid').value = student.rfid || '';
+            document.getElementById('edit-student-modal').style.display = 'block';
+        }
+
+        function confirmArchive(studentId, studentName) {
+            document.getElementById('archive-student-name').textContent = studentName;
+            document.getElementById('confirm-archive').dataset.studentId = studentId;
+            document.getElementById('archive-confirm-modal').style.display = 'block';
+        }
+
+        async function confirmUnarchive(studentId, studentName) {
+            if (confirm(`Are you sure you want to unarchive "${studentName}"? This will restore them to the active student list.`)) {
+                try {
+                    await ApiService.unarchiveStudent(studentId);
+                    showNotification(`"${studentName}" has been unarchived successfully!`);
+                    loadStudents(); // Refresh the current view
+                } catch (error) {
+                    console.error('Error unarchiving student:', error);
+                    showNotification('Error unarchiving student. Please try again.');
+                }
+            }
+        }
+
+        async function handleEditStudent(e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('edit-student-id').value;
+            const photoFile = document.getElementById('edit-student-photo').files[0];
+            const updates = {
+                student_number: document.getElementById('edit-student-number').value.trim(),
+                name: document.getElementById('edit-student-name').value.trim(),
+                parent_name: document.getElementById('edit-parent-name').value.trim(),
+                parent_number: document.getElementById('edit-parent-number').value.trim(),
+                grade: document.getElementById('edit-student-grade').value.trim(),
+                rfid: document.getElementById('edit-student-rfid').value.trim()
+            };
+
+            // Validate required fields
+            if (!updates.student_number || !updates.name || !updates.parent_name || !updates.parent_number || !updates.grade) {
+                showNotification('Please fill in all required fields');
+                return;
+            }
+
+            // Show confirmation notification
+            const confirmUpdate = confirm(`Are you sure you want to update the information for "${updates.name}"?`);
+            if (!confirmUpdate) {
+                return;
+            }
+
+            if (isConnected) {
+                try {
+                    // Handle photo upload if provided
+                    if (photoFile) {
+                        console.log('Uploading new photo for student:', photoFile);
+
+                        const fileExt = photoFile.name.split('.').pop().toLowerCase();
+                        const fileName = `${updates.student_number}_${Date.now()}.${fileExt}`;
+
+                        const { data: uploadData, error: uploadError } = await window.supabaseClient.storage
+                            .from('avatars')
+                            .upload(fileName, photoFile, {
+                                cacheControl: '3600',
+                                upsert: false
+                            });
+
+                        if (uploadError) {
+                            console.error('Error uploading photo:', uploadError);
+                            throw new Error(`Photo upload failed: ${uploadError.message}`);
+                        }
+
+                        const { data: urlData } = window.supabaseClient.storage
+                            .from('avatars')
+                            .getPublicUrl(fileName);
+
+                        updates.avatars = urlData.publicUrl;
+                        console.log('New photo URL:', updates.avatars);
+                    }
+
+                    await ApiService.updateStudent(studentId, updates);
+                    showNotification('Student updated successfully!');
+                    loadStudents();
+                } catch (error) {
+                    console.error('Error updating student:', error);
+                    showNotification('Error updating student: ' + error.message);
+                }
+            } else {
+                // Update local data
+                const index = students.findIndex(s => s.id == studentId);
+                if (index !== -1) {
+                    students[index] = { ...students[index], ...updates };
+                    showNotification('Student updated successfully! (offline mode)');
+                    renderStudents();
+                }
+            }
+
+            document.getElementById('edit-student-modal').style.display = 'none';
+        }
+
+        async function handleArchiveStudent() {
+            const studentId = document.getElementById('confirm-archive').dataset.studentId;
+
+            if (isConnected) {
+                try {
+                    await ApiService.archiveStudent(studentId);
+                    showNotification('Student archived successfully!');
+                    loadStudents();
+                } catch (error) {
+                    console.error('Error archiving student:', error);
+                    showNotification('Error archiving student');
+                }
+            } else {
+                // Archive locally
+                const index = students.findIndex(s => s.id == studentId);
+                if (index !== -1) {
+                    window.students[index].archived = true;
+                    window.students[index].archived_at = new Date().toISOString();
+                    showNotification('Student archived successfully! (offline mode)');
+                    renderStudents();
+                    updateStudentStats();
+                }
+            }
+
+            document.getElementById('archive-confirm-modal').style.display = 'none';
+        }
+
+        function handleStudentSearch(e) {
+            currentSearchTerm = e.target.value.toLowerCase();
+            renderStudents();
+        }
+
+        function handleGradeFilter(e) {
+            const selectedGrade = e.target.value;
+            renderStudents();
+        }
+
+        function toggleArchivedView() {
+            window.showingArchived = !window.showingArchived;
+            const toggleBtn = document.getElementById('toggle-archived-btn');
+
+            if (window.showingArchived) {
+                toggleBtn.innerHTML = '<i class="fas fa-users"></i> Show Active Students';
+                toggleBtn.className = 'btn btn-outline-secondary';
+            } else {
+                toggleBtn.innerHTML = '<i class="fas fa-archive"></i> Show Archived Students';
+                toggleBtn.className = 'btn btn-secondary';
+            }
+
+            loadStudents();
+        }
+
+        function showNotification(message) {
+            // Simple notification function
+            console.log('Notification:', message);
+            // You can implement a proper notification system here
+        }
+
+        function toggleEditMode(studentId, event) {
+            event.stopPropagation(); // Prevent card click
+            const student = window.students.find(s => s.id == studentId);
+            if (!student) return;
+
+            // Remove any existing overlays
+            document.querySelectorAll('.edit-mode-overlay').forEach(overlay => overlay.remove());
+
+            // Create edit mode overlay with different actions based on archived status
+            const editOverlay = document.createElement('div');
+            editOverlay.className = 'edit-mode-overlay';
+
+            const isArchived = student.archived;
+            const actionsHtml = isArchived ? `
+                <div class="edit-actions">
+                    <button class="btn btn-info btn-sm" onclick="showStudentDetails('${studentId}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="openEditModal('${studentId}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="confirmUnarchive('${studentId}', '${student.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-undo"></i> Restore
+                    </button>
+                </div>
+            ` : `
+                <div class="edit-actions">
+                    <button class="btn btn-info btn-sm" onclick="showStudentDetails('${studentId}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="openEditModal('${studentId}')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="confirmArchive('${studentId}', '${student.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-archive"></i> Archive
+                    </button>
+                </div>
+            `;
+
+            editOverlay.innerHTML = actionsHtml;
+
+            // Position the overlay fixed to viewport, below the button
+            const buttonRect = event.target.getBoundingClientRect();
+            editOverlay.style.position = 'fixed';
+            editOverlay.style.top = (buttonRect.bottom + 5) + 'px';
+            editOverlay.style.left = buttonRect.left + 'px';
+            editOverlay.style.zIndex = '9999';
+
+            // Ensure visibility and styling
+            editOverlay.style.backgroundColor = 'var(--bg-primary)';
+            editOverlay.style.border = '1px solid var(--border-color)';
+            editOverlay.style.borderRadius = 'var(--radius-md)';
+            editOverlay.style.boxShadow = 'var(--shadow-lg)';
+            editOverlay.style.opacity = '1';
+            editOverlay.style.pointerEvents = 'auto';
+            editOverlay.style.display = 'block';
+
+            document.body.appendChild(editOverlay);
+
+            // Close overlay when clicking outside
+            const closeOverlay = (e) => {
+                if (!editOverlay.contains(e.target)) {
+                    editOverlay.remove();
+                    document.removeEventListener('click', closeOverlay);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeOverlay), 10);
+        }
+
+        function showStudentDetails(studentId) {
+            const student = window.students.find(s => s.id == studentId);
+            if (!student) return;
+
+            // Create student details modal
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'student-details-modal';
+            modal.innerHTML = `
+                <div class="modal-content student-details-modal">
+                    <div class="modal-header-title">
+                        <div class="icon-circle"><i class="fas fa-user"></i></div>
+                        <div>
+                            <h2>Student Details</h2>
+                            <p class="subtitle">Complete information for ${student.name}</p>
+                        </div>
+                        <button class="close" onclick="this.closest('.modal').style.display='none'">&times;</button>
+                    </div>
+                    <div class="student-details-content">
+                        <div class="student-details-grid">
+                            <div class="detail-section">
+                                <h3>Basic Information</h3>
+                                <div class="detail-item">
+                                    <label>Student Number:</label>
+                                    <span>${student.student_number || 'N/A'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Full Name:</label>
+                                    <span>${student.name}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Grade:</label>
+                                    <span>${student.grade || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Parent Information</h3>
+                                <div class="detail-item">
+                                    <label>Parent Name:</label>
+                                    <span>${student.parent_name || 'N/A'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Parent Phone:</label>
+                                    <span>${student.parent_number || student.parent_phone || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="detail-section">
+                                <h3>Additional Information</h3>
+                                <div class="detail-item">
+                                    <label>RFID Tag:</label>
+                                    <span>${student.rfid || 'Not assigned'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Status:</label>
+                                    <span class="${student.archived ? 'status-archived' : 'status-active'}">${student.archived ? 'Archived' : 'Active'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Date Added:</label>
+                                    <span>${student.created_at ? new Date(student.created_at).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="student-photo-section">
+                            <h3>Student Photo</h3>
+                            <div class="student-photo-display">
+                                ${student.avatars
+                    ? `<img src="${student.avatars}" alt="${student.name}" class="student-large-photo">`
+                    : `<div class="student-avatar-large">${student.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>`
+                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').style.display='none'">Close</button>
+                        <button class="btn btn-primary" onclick="openEditModal('${studentId}')">Edit Student</button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+            modal.style.display = 'block';
+        }
+
+        // Export functions for global access
+        window.openEditModal = openEditModal;
+        window.confirmArchive = confirmArchive;
+        window.confirmUnarchive = confirmUnarchive;
+        window.toggleEditMode = toggleEditMode;
+        window.showStudentDetails = showStudentDetails;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Settings - JAJ Attendance System</title>
+    <link rel="stylesheet" href="../css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .settings-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .settings-section h3 {
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .setting-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .setting-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .test-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+        }
+
+        .test-input {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .test-input input {
+            flex: 1;
+        }
+
+        .instructions {
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .instructions h4 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .instructions ol {
+            margin: 0;
+            padding-left: var(--spacing-lg);
+        }
+
+        .instructions li {
+            margin-bottom: var(--spacing-sm);
+            color: var(--text-primary);
+        }
+
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-md);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: var(--spacing-md) 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="../assets/JAJ Seal.jpg" alt="JAJ Logo">
+                    <h3><i class="fas fa-graduation-cap"></i> Attendance System</h3>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a></li>
+                <li><a href="students.html" class="nav-link">
+                        <i class="fas fa-users"></i> Students
+                    </a></li>
+                <li><a href="attendance.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i> Attendance
+                    </a></li>
+                <li><a href="notifications.html" class="nav-link">
+                        <i class="fas fa-bell"></i> Notifications
+                    </a></li>
+                <li><a href="rfid-settings.html" class="nav-link active">
+                        <i class="fas fa-cog"></i> RFID Settings
+                    </a></li>
+                <li><a href="#" id="logout-btn" class="nav-link" onclick="confirmLogout(event)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-theme-toggle">
+                <button id="sidebar-theme-toggle" class="theme-toggle-sidebar" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-wrapper">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-wifi"></i> RFID Scanner Settings</h1>
+                    <div class="header-actions">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="settings-container">
+                    <!-- Setup Instructions -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-info-circle"></i> Setup Instructions</h3>
+                        <div class="instructions">
+                            <h4>How to integrate your long-range RFID scanner:</h4>
+                            <ol>
+                                <li>Configure your RFID scanner to output scanned tags to a text file</li>
+                                <li>Set the output file path (default: C:\rfid_scans.txt)</li>
+                                <li>Start the RFID monitoring server (see commands below)</li>
+                                <li>Each scanned RFID tag will automatically appear in the file</li>
+                                <li>The system will detect new scans and mark attendance automatically</li>
+                            </ol>
+                        </div>
+
+                        <div class="code-block">
+                            // Install dependencies for the RFID server:
+                            npm install express cors
+
+                            // Start the RFID monitoring server:
+                            node src/js/rfid-server.js
+
+                            // The server will run on http://localhost:3001
+                            // Your web app should connect to this server for RFID data
+                        </div>
+                    </div>
+
+                    <!-- File Settings -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-file"></i> File Configuration</h3>
+
+                        <div class="setting-group">
+                            <label class="setting-label">RFID Scan File Path</label>
+                            <span class="setting-description">Path to the text file where your RFID scanner outputs
+                                scanned tags</span>
+                            <input type="text" id="scan-file-path" class="setting-input"
+                                placeholder="C:\rfid_scans.txt">
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Scan Check Interval (ms)</label>
+                            <span class="setting-description">How often to check for new RFID scans (1000ms = 1
+                                second)</span>
+                            <input type="number" id="scan-interval" class="setting-input" placeholder="1000" min="500"
+                                max="5000">
+                        </div>
+
+                        <button id="save-settings" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-chart-line"></i> System Status</h3>
+
+                        <div class="setting-group">
+                            <label class="setting-label">RFID Server Status</label>
+                            <div id="server-status" class="status-indicator status-inactive">
+                                <i class="fas fa-circle"></i>
+                                <span>Checking...</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Scan File Status</label>
+                            <div id="file-status" class="status-indicator status-inactive">
+                                <i class="fas fa-circle"></i>
+                                <span>Checking...</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Processed Scans</label>
+                            <div id="processed-count" class="status-indicator status-inactive">
+                                <i class="fas fa-circle"></i>
+                                <span>0 scans processed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testing -->
+                    <div class="settings-section">
+                        <h3><i class="fas fa-flask"></i> Testing</h3>
+
+                        <div class="test-section">
+                            <p class="setting-description">Test the RFID integration by manually entering an RFID tag
+                            </p>
+
+                            <div class="test-input">
+                                <input type="text" id="test-rfid" class="setting-input"
+                                    placeholder="Enter RFID tag (e.g., STU001)">
+                                <button id="test-scan" class="btn btn-secondary">
+                                    <i class="fas fa-play"></i> Test Scan
+                                </button>
+                            </div>
+
+                            <button id="clear-processed" class="btn btn-outline-secondary">
+                                <i class="fas fa-trash"></i> Clear Processed Scans
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </main>
+    </div>
+
+    <script src="../js/ui.js"></script>
+    <script type="module" src="../js/supabase-config.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <script type="module">
+        import ApiService from '../js/api.js';
+
+        class RFIDSettings {
+            constructor() {
+                this.serverUrl = 'http://localhost:3001';
+                this.init();
+            }
+
+            async init() {
+                this.loadSettings();
+                this.setupEventListeners();
+                this.checkStatus();
+                setInterval(() => this.checkStatus(), 5000); // Check every 5 seconds
+            }
+
+            loadSettings() {
+                const scanFile = localStorage.getItem('rfidScanFile') || 'C:\\rfid_scans.txt';
+                const scanInterval = localStorage.getItem('rfidScanInterval') || '1000';
+
+                document.getElementById('scan-file-path').value = scanFile;
+                document.getElementById('scan-interval').value = scanInterval;
+            }
+
+            setupEventListeners() {
+                // Save settings
+                document.getElementById('save-settings').addEventListener('click', () => {
+                    this.saveSettings();
+                });
+
+                // Test scan
+                document.getElementById('test-scan').addEventListener('click', () => {
+                    this.testScan();
+                });
+
+                // Clear processed scans
+                document.getElementById('clear-processed').addEventListener('click', () => {
+                    this.clearProcessed();
+                });
+
+                // Enter key on test input
+                document.getElementById('test-rfid').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.testScan();
+                    }
+                });
+            }
+
+            async saveSettings() {
+                const scanFile = document.getElementById('scan-file-path').value.trim();
+                const scanInterval = document.getElementById('scan-interval').value.trim();
+
+                if (!scanFile) {
+                    showNotification('Please enter a scan file path');
+                    return;
+                }
+
+                if (!scanInterval || isNaN(scanInterval) || scanInterval < 500) {
+                    showNotification('Please enter a valid scan interval (minimum 500ms)');
+                    return;
+                }
+
+                localStorage.setItem('rfidScanFile', scanFile);
+                localStorage.setItem('rfidScanInterval', scanInterval);
+
+                // Update server config if running
+                try {
+                    await fetch(`${this.serverUrl}/api/rfid/config`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ scanFile })
+                    });
+                } catch (error) {
+                    console.log('Server not running, settings saved locally');
+                }
+
+                showNotification('Settings saved successfully!');
+            }
+
+            async checkStatus() {
+                try {
+                    const response = await fetch(`${this.serverUrl}/api/health`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.updateStatus('server-status', 'active', 'Server Running');
+                        this.updateStatus('file-status', 'active', `Monitoring: ${data.scanFile}`);
+                        this.updateStatus('processed-count', 'active', `${data.processedScans} scans processed`);
+                    }
+                } catch (error) {
+                    this.updateStatus('server-status', 'inactive', 'Server Not Running');
+                    this.updateStatus('file-status', 'inactive', 'Server Required');
+                    this.updateStatus('processed-count', 'inactive', 'Server Required');
+                }
+            }
+
+            updateStatus(elementId, status, message) {
+                const element = document.getElementById(elementId);
+                element.className = `status-indicator status-${status}`;
+                element.innerHTML = `
+                    <i class="fas fa-circle"></i>
+                    <span>${message}</span>
+                `;
+            }
+
+            async testScan() {
+                const rfid = document.getElementById('test-rfid').value.trim();
+                if (!rfid) {
+                    showNotification('Please enter an RFID tag to test');
+                    return;
+                }
+
+                try {
+                    // Try server first
+                    const response = await fetch(`${this.serverUrl}/api/rfid/scans`);
+                    if (response.ok) {
+                        showNotification('Please add the RFID tag to your scan file manually for testing');
+                        return;
+                    }
+                } catch (error) {
+                    // Fall back to local testing
+                    console.log('Server not available, using local test');
+                }
+
+                // Manual scan for testing
+                if (window.RFIDMonitor) {
+                    await window.RFIDMonitor.manualScan(rfid);
+                    document.getElementById('test-rfid').value = '';
+                    showNotification(`Test scan processed for RFID: ${rfid}`);
+                } else {
+                    showNotification('RFID Monitor not available');
+                }
+            }
+
+            async clearProcessed() {
+                try {
+                    await fetch(`${this.serverUrl}/api/rfid/clear`, { method: 'POST' });
+                    showNotification('Processed scans cleared on server');
+                } catch (error) {
+                    // Clear locally
+                    if (window.RFIDMonitor) {
+                        window.RFIDMonitor.clearProcessedScans();
+                        showNotification('Processed scans cleared locally');
+                    }
+                }
+
+                this.checkStatus();
+            }
+        }
+
+        // Initialize settings when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new RFIDSettings();
+        });
+    </script>
+</body>
+
+</html>

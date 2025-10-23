@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance System - RFID Integration</title>
+    <link rel="stylesheet" href="../css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script type="module" src="../js/supabase-config.js"></script>
+    <style>
+        /* RFID Scanner Card enhancements */
+        .scanner-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-xl);
+            transition: box-shadow .2s ease, transform .2s ease;
+        }
+
+        .scanner-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+
+        .scanner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .scanner-header h2 {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin: 0;
+        }
+
+        .scanner-status {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+        }
+
+        .status-indicator {
+            position: relative;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success-color);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), 0 0 12px rgba(16, 185, 129, 0.35);
+            animation: pulseGlow 2.4s ease-in-out infinite;
+        }
+
+        .status-indicator::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            border-radius: inherit;
+            opacity: 0;
+            transform: scale(0.6);
+            animation: ripple 2.4s ease-out infinite;
+        }
+
+        .status-indicator::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.15);
+            opacity: 0;
+            animation: softPulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15), 0 0 8px rgba(16, 185, 129, 0.25);
+            }
+
+            50% {
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.25), 0 0 18px rgba(16, 185, 129, 0.45);
+            }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0.6);
+                opacity: 0.6;
+            }
+
+            70% {
+                opacity: 0.2;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        @keyframes softPulse {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* RFID animation area */
+        .rfid-animation {
+            position: relative;
+            display: grid;
+            place-items: center;
+            height: 180px;
+            background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.08), transparent 60%);
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-lg);
+            overflow: hidden;
+        }
+
+        .rfid-animation .rfid-waves::before,
+        .rfid-animation .rfid-waves::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            height: 120px;
+            border: 2px solid rgba(37, 99, 235, 0.45);
+            border-radius: 50%;
+            opacity: .35;
+            animation: wave 3.0s infinite ease-out;
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.25);
+            transform: translate(-50%, -50%);
+        }
+
+        .rfid-animation .rfid-waves::after {
+            width: 160px;
+            height: 160px;
+            animation-delay: .8s;
+        }
+
+        @keyframes wave {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: .35;
+            }
+
+            60% {
+                opacity: .18;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1.9);
+                opacity: 0;
+            }
+        }
+
+        .rfid-animation .rfid-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .rfid-animation .rfid-icon i {
+            color: var(--primary-color);
+        }
+
+        /* Input + button row */
+        .scan-input-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .rfid-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0 var(--spacing-md);
+            height: 44px;
+            min-width: 260px;
+            flex: 1;
+            max-width: 420px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .rfid-input-wrapper i {
+            color: var(--text-secondary);
+        }
+
+        #rfid-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            height: 100%;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        #rfid-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .rfid-input-wrapper:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        #simulate-scan {
+            white-space: nowrap;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #simulate-scan:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+
+
+        /* Last Scanned Student Display */
+        .scan-result-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .scan-result-content {
+            height: 120px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scan-result-content .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .scan-result-content .empty-state i {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+            opacity: 0.6;
+        }
+
+        .student-scan-info {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-lg);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .student-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .student-details {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .student-info {
+            display: flex;
+            gap: var(--spacing-md);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .student-info span {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .scan-timestamp {
+            color: var(--success-color);
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .scan-input-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #simulate-scan {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .student-scan-info {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--spacing-md);
+            }
+
+            .student-info {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="../assets/JAJ Seal.jpg" alt="JAJ Logo">
+                    <h3><i class="fas fa-graduation-cap"></i> Attendance System</h3>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="nav-link active">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a></li>
+                <li><a href="students.html" class="nav-link">
+                        <i class="fas fa-users"></i> Students
+                    </a></li>
+                <li><a href="attendance.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i> Attendance
+                    </a></li>
+                <li><a href="notifications.html" class="nav-link">
+                        <i class="fas fa-bell"></i> Notifications
+                    </a></li>
+                <li><a href="#" id="logout-btn" class="nav-link" onclick="confirmLogout(event)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-theme-toggle">
+                <button id="sidebar-theme-toggle" class="btn-icon theme-toggle-sidebar" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-wrapper">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-graduation-cap"></i> Student Attendance System</h1>
+                    <div class="header-actions">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Dashboard -->
+            <main class="main-content">
+                <!-- Connection Status -->
+                <!-- connection-status banner removed -->
+
+                <!-- Statistics Section -->
+                <section class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <h3 id="total-students">0</h3>
+                                <p>Total Students</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-user-check"></i>
+                            <div>
+                                <h3 id="active-students">0</h3>
+                                <p>Active Students</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-archive"></i>
+                            <div>
+                                <h3 id="archived-students">0</h3>
+                                <p>Archived Students</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-percentage"></i>
+                            <div>
+                                <h3 id="attendance-rate">0%</h3>
+                                <p>Attendance Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RFID Scanner Section -->
+                <section class="scanner-section">
+                    <div class="scanner-card">
+                        <div class="scanner-header">
+                            <h2><i class="fas fa-wifi"></i> RFID Scanner</h2>
+                            <div class="scanner-status">
+                                <span class="status-indicator" id="scanner-status"></span>
+                                <span>Ready to Scan</span>
+                            </div>
+                        </div>
+
+                        <div class="scanner-interface">
+                            <div class="rfid-animation" id="rfid-animation">
+                                <div class="rfid-waves"></div>
+                                <div class="rfid-icon">
+                                    <i class="fas fa-signal"></i>
+                                </div>
+                            </div>
+
+                            <div class="scan-input-section">
+                                <div class="rfid-input-wrapper">
+                                    <i class="fas fa-qrcode"></i>
+                                    <input type="text" id="rfid-input" placeholder="Enter RFID Tag ID..."
+                                        maxlength="20">
+                                </div>
+                                <button id="simulate-scan" class="btn btn-primary">
+                                    <i class="fas fa-qrcode"></i> Simulate Scan
+                                </button>
+                            </div>
+
+                            <!-- Hidden scanner elements from scanner.html -->
+                            <input type="text" id="rfidInput" style="opacity: 0; position: absolute;"
+                                autocomplete="off">
+                            <div class="message" id="status"
+                                style="font-size: 1.2rem; color: var(--text-secondary); margin-top: 10px; text-align: center;">
+                                Waiting for scan...</div>
+                            <div class="connection-status" id="connectionStatus" style="display: none;">
+                                Checking connection...</div>
+
+                            <!-- Full-screen input capture overlay -->
+                            <div id="rfidCapture" contenteditable="true" style="
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                width: 100vw;
+                                height: 100vh;
+                                z-index: -1;
+                                opacity: 0;
+                                pointer-events: auto;
+                                background: transparent;
+                                border: none;
+                                outline: none;
+                                font-size: 0;
+                                line-height: 0;
+                                padding: 0;
+                                margin: 0;
+                                overflow: hidden;
+                            "></div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Last Scanned Student Display -->
+                <section class="scan-result-section">
+                    <div class="scan-result-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-user-check"></i> Last Scanned Student</h3>
+                        </div>
+                        <div class="scan-result-content" id="scan-result-content">
+                        </div>
+                    </div>
+                </section>
+            </main>
+    </div>
+    </div>
+    <!-- Supabase credentials: set before config loads. Fill in your real values and uncomment. -->
+    <script>
+        window.SUPABASE_URL = 'https://jxdvtnvffbfbgianfjhz.supabase.co';
+        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4ZHZ0bnZmZmJmYmdpYW5mamh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NDQzODUsImV4cCI6MjA3MjAyMDM4NX0.5Tdd_zND0GfVGJh1x_dqx9gpdO5QxVkpQp4pHviTfsY';
+    </script>
+    <script type="module" src="../js/supabase-config.js"></script>
+    <script type="module" src="../js/scanner.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <script type="module" src="../js/rfid-monitor.js"></script>
+    <script type="module" src="../js/app-new.js"></script>
+</body>
+
+</html>

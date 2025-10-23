@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Student Attendance System</title>
+    <link rel="stylesheet" href="../css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <!-- Authentication check - prevent content flashing -->
+    <script type="module">
+        import { isLoggedIn, redirectToLogin } from '../js/auth.js';
+        if (!isLoggedIn()) {
+            redirectToLogin();
+        }
+    </script>
+    <style>
+        /* Styled dropdown for notification page */
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .select-btn {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md) var(--spacing-lg);
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            padding-right: 2.25rem;
+            /* space for chevron */
+        }
+
+        .select-btn:hover {
+            background-color: var(--primary-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .select-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+        }
+
+        .select-wrapper::after {
+            content: "\f078";
+            /* Font Awesome chevron-down */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffffff;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="../assets/JAJ Seal.jpg" alt="JAJ Logo">
+                    <h3><i class="fas fa-graduation-cap"></i> Attendance System</h3>
+                </div>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a></li>
+                <li><a href="students.html" class="nav-link">
+                        <i class="fas fa-users"></i> Students
+                    </a></li>
+                <li><a href="attendance.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i> Attendance
+                    </a></li>
+                <li><a href="notifications.html" class="nav-link active">
+                        <i class="fas fa-bell"></i> Notifications
+                    </a></li>
+                <li><a href="#" id="logout-btn" class="nav-link" onclick="confirmLogout(event)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-theme-toggle">
+                <button id="sidebar-theme-toggle" class="btn-icon theme-toggle-sidebar" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </nav>
+
+        <main class="main-wrapper">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-content"
+                    style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;">
+                    <h1 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-bell"></i>
+                        Notifications</h1>
+                    <div class="header-actions" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <label for="sort-notifications" style="margin: 0; font-weight: 500;">Sort by:</label>
+                        <div class="select-wrapper">
+                            <select id="sort-notifications" class="select-btn" onchange="renderNotifications()">
+                                <option value="student_name">Student Name (A-Z)</option>
+                                <option value="student_rfid">Student RFID</option>
+                                <option value="timestamp">Timestamp</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </header>
+
+            <!-- Statistics Section -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <h3 id="total-students">0</h3>
+                            <p>Total Students</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user-check"></i>
+                        <div>
+                            <h3 id="active-students">0</h3>
+                            <p>Active Students</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-archive"></i>
+                        <div>
+                            <h3 id="archived-students">0</h3>
+                            <p>Archived Students</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-bell"></i>
+                        <div>
+                            <h3 id="notifications-sent">0</h3>
+                            <p>Notifications Sent</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notifications Section -->
+            <section class="notification-section">
+                <div class="notification-card" style="padding: 1.5rem;">
+                    <div class="card-header" style="margin-bottom: 1rem;">
+                        <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;"><i
+                                class="fas fa-bell"></i> Parent Notifications</h3>
+                    </div>
+                    <div class="notification-list" id="notification-list" style="overflow-x: auto;">
+                        <table id="notification-table" class="notification-table" style="min-width: 900px;">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Student RFID</th>
+                                    <th>Message</th>
+                                    <th>Parent Phone</th>
+                                    <th>Timestamp</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notification-table-body">
+                                <tr class="empty-state">
+                                    <td colspan="6" style="text-align:center;">
+                                        <i class="fas fa-bell-slash"></i>
+                                        <p style="display:inline;">No notifications yet</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="../js/ui.js"></script>
+    <script type="module" src="../js/supabase-config.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <script type="module" src="../js/app-new.js"></script>
+
+</body>
+
+</html>

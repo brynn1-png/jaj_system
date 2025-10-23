@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Student Grades</title>
+</head>
+
+<body>
+    <h1>Student Grades Query</h1>
+    <div id="results"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/esm/index.js';
+
+        const SUPABASE_URL = 'https://jxdvtnvffbfbgianfjhz.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4ZHZ0bnZmZmJmYmdpYW5mamh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY0NDQzODUsImV4cCI6MjA3MjAyMDM4NX0.5Tdd_zND0GfVGJh1x_dqx9gpdO5QxVkpQp4pHviTfsY';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function getDistinctGrades() {
+            const resultsDiv = document.getElementById('results');
+
+            try {
+                resultsDiv.innerHTML = '<p>Loading grades...</p>';
+
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('grade')
+                    .not('grade', 'is', null)
+                    .neq('grade', '');
+
+                if (error) {
+                    resultsDiv.innerHTML = `<p style="color: red;">Error fetching grades: ${error.message}</p>`;
+                    console.error('Error fetching grades:', error);
+                    return;
+                }
+
+                // Get distinct grades
+                const grades = [...new Set(data.map(student => student.grade))].sort();
+
+                let html = '<h2>Distinct Grades in Students Table:</h2>';
+                html += '<ul>';
+                grades.forEach(grade => {
+                    html += `<li>${grade}</li>`;
+                });
+                html += '</ul>';
+                html += `<p><strong>Total distinct grades: ${grades.length}</strong></p>`;
+
+                resultsDiv.innerHTML = html;
+
+                console.log('Distinct grades:', grades);
+
+            } catch (e) {
+                resultsDiv.innerHTML = `<p style="color: red;">Unexpected error: ${e.message}</p>`;
+                console.error('Unexpected error:', e);
+            }
+        }
+
+        // Run the query when page loads
+        getDistinctGrades();
+    </script>
+</body>
+
+</html>
